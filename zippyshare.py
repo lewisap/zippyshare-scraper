@@ -4,6 +4,9 @@ import re
 import json
 import requests
 import urllib.parse
+import sys
+import os
+from pick import pick
 from bs4 import BeautifulSoup
 
 class ZippyLink():
@@ -13,6 +16,7 @@ class ZippyLink():
 		self._links = []
 		self.REGEX_2 = r'(\")(.*)(\/\") (\+) (.*) (\+) (\")(.*)(\")'
 		self._session = requests.Session()
+		self.linksPath = "./video-links"
 
 	def do_main(self):
 		''' Main function which returns the list of download links '''
@@ -38,7 +42,11 @@ class ZippyLink():
 			opt = input("File(f) | List(l) | dlcfile (d)? ")
 			if opt.lower() == 'f':
 				try:
-					file = open(input("File path: "), "r")
+					title = 'Which video list should we process:'
+					options = os.listdir(self.linksPath)
+					listName, index = pick(options, title)
+
+					file = open(self.linksPath + "/" + listName, "r")
 					links = tuple(file)
 					file.close()
 					links = [ i[:-1] for i in links if (i != '' and i != '\n') ]
@@ -150,14 +158,14 @@ class ZippyLink():
 				extract = "{}/{}{}".format(part_1, part_2, part_3)
 				extract = re.sub('/pd/', '/d/', extract)
 
-				return extract, True		
+				return extract, True
 
 
 
 if __name__ == "__main__":
 	parser = ZippyLink()
 	links = parser.do_main()
-	file = open('links.txt', 'w')
+	file = open('download-links.txt', 'w')
 	for i in links:
 		file.write(i+"\n")
 
